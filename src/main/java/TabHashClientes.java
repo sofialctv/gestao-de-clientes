@@ -1,8 +1,11 @@
 import com.github.javafaker.Faker;
+import models.Cliente;
+
 import java.util.Arrays;
 //1009, 1013, 1019, 1021 e 1031
 //  10007, 10009, 10037, 10039 e 10061.
 //  1000003, 1000033, 1000037, 1000039 e 1000081.
+
 public class TabHashClientes {
 	private static final int[] PRIMOS = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71};
     private static final int MAXTAB = 1007; // Tamanho máximo da tabela hash

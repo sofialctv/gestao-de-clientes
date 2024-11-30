@@ -1,3 +1,9 @@
+package views;
+
+import models.ArquivoCliente;
+import models.BufferDeClientes;
+import models.Cliente;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -7,6 +13,7 @@ import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 
 public class ClienteGUI2 extends JFrame {
+
     private JTable table;
     private DefaultTableModel tableModel;
     private BufferDeClientes bufferDeClientes;
@@ -24,7 +31,6 @@ public class ClienteGUI2 extends JFrame {
         criarInterface();
     }
 
-
     private void carregarArquivo() {
         JFileChooser fileChooser = new JFileChooser();
         int retorno = fileChooser.showOpenDialog(this);
@@ -39,6 +45,7 @@ public class ClienteGUI2 extends JFrame {
         }
     }
     private void criarInterface() {
+
         JPanel panel = new JPanel(new BorderLayout());
         JButton btnCarregar = new JButton("Carregar Clientes");
         tableModel = new DefaultTableModel(new String[]{"#", "Nome", "Sobrenome", "Telefone", "Endereço", "Credit Score"}, 0);

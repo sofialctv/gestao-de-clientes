@@ -1,3 +1,5 @@
+package models;
+
 import java.io.Serializable;
 
 public class Cliente implements Serializable {
@@ -64,10 +66,10 @@ public class Cliente implements Serializable {
         this.creditScore = creditScore;
     }
 
-    // Método para exibir as informações do cliente
+    // Metodo para exibir as informações do cliente
     @Override
     public String toString() {
-        return "Cliente{" +
+        return "models.Cliente{" +
                 "nome='" + nome + '\'' +
                 ", sobrenome='" + sobrenome + '\'' +
                 ", endereco='" + endereco + '\'' +

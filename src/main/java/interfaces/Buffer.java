@@ -1,3 +1,5 @@
+package interfaces;
+
 public interface Buffer<T> {
 
     // Associa o buffer a um arquivo sequencial

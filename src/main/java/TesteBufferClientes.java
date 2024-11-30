@@ -1,3 +1,7 @@
+import models.ArquivoCliente;
+import models.BufferDeClientes;
+import models.Cliente;
+
 public class TesteBufferClientes {
 
     public static void main(String[] args) {

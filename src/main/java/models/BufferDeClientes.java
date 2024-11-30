@@ -1,3 +1,8 @@
+package models;
+
+import interfaces.ArquivoSequencial;
+import interfaces.Buffer;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -42,7 +47,7 @@ public class BufferDeClientes implements Buffer<Cliente> {
     @Override
     public void carregaBuffer() {
         if (!modo.equals("leitura")) {
-            throw new IllegalStateException("Buffer não está em modo de leitura!");
+            throw new IllegalStateException("interfaces.Buffer não está em modo de leitura!");
         }
 
         try {
@@ -64,7 +69,7 @@ public class BufferDeClientes implements Buffer<Cliente> {
     @Override
     public void escreveBuffer() {
         if (!modo.equals("escrita")) {
-            throw new IllegalStateException("Buffer não está em modo de escrita!");
+            throw new IllegalStateException("interfaces.Buffer não está em modo de escrita!");
         }
 
         try {
@@ -89,7 +94,7 @@ public class BufferDeClientes implements Buffer<Cliente> {
     // Adiciona um cliente ao buffer (modo escrita)
     public void adicionaAoBuffer(Cliente cliente) {
         if (!modo.equals("escrita")) {
-            throw new IllegalStateException("Buffer não está em modo de escrita!");
+            throw new IllegalStateException("interfaces.Buffer não está em modo de escrita!");
         }
 
         buffer.add(cliente);
@@ -103,7 +108,7 @@ public class BufferDeClientes implements Buffer<Cliente> {
     // Lê o próximo cliente do buffer (modo leitura)
     public Cliente proximoCliente() {
         if (!modo.equals("leitura")) {
-            throw new IllegalStateException("Buffer não está em modo de leitura!");
+            throw new IllegalStateException("interfaces.Buffer não está em modo de leitura!");
         }
 
         if (buffer.isEmpty()) {

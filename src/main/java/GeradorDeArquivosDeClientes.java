@@ -1,4 +1,7 @@
 import com.github.javafaker.Faker;
+import models.ArquivoCliente;
+import models.Cliente;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

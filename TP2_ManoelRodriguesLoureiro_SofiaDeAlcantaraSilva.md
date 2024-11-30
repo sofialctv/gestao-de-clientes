@@ -1,4 +1,4 @@
-# Trabalho Prático 2 - Sistema de Gerenciamento de Cliente
+# Trabalho Prático 2 - Sistema de Gerenciamento de models.Cliente
 
 * **Autores:** Manoel Rodrigues Loureiro e Sofia de Alcantara Silva
 * **Disciplina:** Técnicas de Programação Avançada  
