@@ -13,17 +13,17 @@ O sistema utilizará uma interface gráfica com o usuário (GUI) baseada em JFra
 
 ## Descrição das Classes
 
-- **models.Cliente**: Representa um cliente da empresa, com atributos como nome, sobrenome, telefone, endereço e credit score. Esta classe será a base para armazenar e gerenciar informações dos clientes.
+- **Cliente**: Representa um cliente da empresa, com atributos como nome, sobrenome, telefone, endereço e credit score. Esta classe será a base para armazenar e gerenciar informações dos clientes.
 
-- **utils.GeradorDeArquivosDeClientes**: Classe responsável por gerar arquivos de clientes para testes, possibilitando a criação de um arquivo com até 10 milhões de registros. A geração dos dados será realizada com a biblioteca Java Faker.
+- **GeradorDeArquivosDeClientes**: Classe responsável por gerar arquivos de clientes para testes, possibilitando a criação de um arquivo com até 10 milhões de registros. A geração dos dados será realizada com a biblioteca Java Faker.
 
-- **models.ArquivoCliente**: Implementa a interface `interfaces.ArquivoSequencial` e permite a manipulação dos dados de clientes armazenados em arquivos binários. Essa classe oferece métodos para abrir, fechar, ler e escrever registros de clientes.
+- **ArquivoCliente**: Implementa a interface `interfaces.ArquivoSequencial` e permite a manipulação dos dados de clientes armazenados em arquivos binários. Essa classe oferece métodos para abrir, fechar, ler e escrever registros de clientes.
 
-- **models.BufferDeClientes**: Implementa um buffer intermediário para leitura e escrita de dados dos clientes entre o arquivo em disco e a memória principal, permitindo operações eficientes sobre grandes volumes de dados.
+- **BufferDeClientes**: Implementa um buffer intermediário para leitura e escrita de dados dos clientes entre o arquivo em disco e a memória principal, permitindo operações eficientes sobre grandes volumes de dados.
 
-- **views.ClienteGUI**: Classe responsável pela interface gráfica do sistema, que inclui uma tabela para visualização de clientes. A interface apresenta funcionalidades de busca, inserção e remoção de clientes, além de exibir clientes em ordem alfabética.
+- **ClienteGUI**: Classe responsável pela interface gráfica do sistema, que inclui uma tabela para visualização de clientes. A interface apresenta funcionalidades de busca, inserção e remoção de clientes, além de exibir clientes em ordem alfabética.
 
-- **views.ClienteGUI2**: Variante da interface gráfica projetada para otimizar a exibição de grandes volumes de dados. Essa versão utiliza o `models.BufferDeClientes` para carregar registros em lotes conforme o usuário rola a tabela, minimizando o uso de memória.
+- **ClienteGUI2**: Variante da interface gráfica projetada para otimizar a exibição de grandes volumes de dados. Essa versão utiliza o `models.BufferDeClientes` para carregar registros em lotes conforme o usuário rola a tabela, minimizando o uso de memória.
 
 ## Diagrama de Classes
 ![img.png](images/img.png)

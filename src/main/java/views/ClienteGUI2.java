@@ -1,16 +1,16 @@
 package views;
 
-import models.ArquivoCliente;
-import models.BufferDeClientes;
-import models.Cliente;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.util.ArrayList;
+import java.util.List;
+
+import models.ArquivoCliente;
+import models.BufferDeClientes;
+import models.Cliente;
 
 public class ClienteGUI2 extends JFrame {
 
@@ -22,18 +22,23 @@ public class ClienteGUI2 extends JFrame {
     private String arquivoSelecionado;
     private boolean arquivoCarregado = false; // Para verificar se o arquivo foi carregado
 
+    private final List<Cliente> listaClientes;
+
+
     public ClienteGUI2() {
         setTitle("Gerenciamento de Clientes");
-        setSize(800, 600);
+        setSize(1000, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         bufferDeClientes = new BufferDeClientes();
+        listaClientes = new ArrayList<>();
         criarInterface();
     }
 
     private void carregarArquivo() {
         JFileChooser fileChooser = new JFileChooser();
         int retorno = fileChooser.showOpenDialog(this);
+
         if (retorno == JFileChooser.APPROVE_OPTION) {
             arquivoSelecionado = fileChooser.getSelectedFile().getAbsolutePath();
             bufferDeClientes.associaBuffer(new ArquivoCliente()); // Substitua por sua implementação
@@ -44,10 +49,18 @@ public class ClienteGUI2 extends JFrame {
             arquivoCarregado = true; // Marca que o arquivo foi carregado
         }
     }
-    private void criarInterface() {
 
+    private void criarInterface() {
         JPanel panel = new JPanel(new BorderLayout());
+        JPanel btn = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
         JButton btnCarregar = new JButton("Carregar Clientes");
+        JButton btnBuscar = new JButton("Buscar Cliente");
+        JButton btnInserir = new JButton("Inserir Cliente");
+        JButton btnRemover = new JButton("Remover Cliente");
+        JButton btnRecarregar = new JButton("Recarregar");
+        JButton btnAlfabeto = new JButton("Ordenar Alfabeticamente");
+
         tableModel = new DefaultTableModel(new String[]{"#", "Nome", "Sobrenome", "Telefone", "Endereço", "Credit Score"}, 0);
         table = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(table);
@@ -58,25 +71,33 @@ public class ClienteGUI2 extends JFrame {
             public void adjustmentValueChanged(AdjustmentEvent e) {
                 if (!scrollPane.getVerticalScrollBar().getValueIsAdjusting()) {
                     // Verifica se estamos no final da tabela e se o arquivo foi carregado
-                    if (arquivoCarregado && 
-                        scrollPane.getVerticalScrollBar().getValue() + 
-                        scrollPane.getVerticalScrollBar().getVisibleAmount() >= 
-                        scrollPane.getVerticalScrollBar().getMaximum()) {
+                    if (arquivoCarregado &&
+                            scrollPane.getVerticalScrollBar().getValue() +
+                                    scrollPane.getVerticalScrollBar().getVisibleAmount() >=
+                                    scrollPane.getVerticalScrollBar().getMaximum()) {
                         carregarMaisClientes();
                     }
                 }
             }
         });
 
-        btnCarregar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                carregarArquivo();
-            }
-        });
+        // Ações dos botões
+        btnCarregar.addActionListener(_ -> carregarArquivo());
+        btnBuscar.addActionListener(_ -> new BuscarCliente(listaClientes, tableModel));
+        btnInserir.addActionListener(_ -> new InserirCliente(listaClientes, tableModel));
+        // btnRemover.addActionListener(_ -> removerCliente());
+        // btnRecarregar.addActionListener(_ -> mostrarTodosClientes());
+        // btnAlfabeto.addActionListener(_ -> ordenarAlfabeticamente(listaClientes, tableModel));
 
-        panel.add(btnCarregar, BorderLayout.NORTH);
+        btn.add(btnCarregar);
+        btn.add(btnBuscar);
+        btn.add(btnInserir);
+        btn.add(btnRemover);
+        btn.add(btnRecarregar);
+        btn.add(btnAlfabeto);
+
         panel.add(scrollPane, BorderLayout.CENTER);
+        panel.add(btn, BorderLayout.SOUTH);
         add(panel);
     }
 

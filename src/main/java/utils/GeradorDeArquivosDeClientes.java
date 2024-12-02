@@ -51,7 +51,6 @@ public class GeradorDeArquivosDeClientes {
     // Método para gerar um cliente fictício
     private Cliente gerarClienteFicticio() {
         String nomeCompleto = gerarNomeUnico();
-
         String sobrenome = faker.name().lastName();
         String endereco = faker.address().fullAddress();
         String telefone = faker.phoneNumber().cellPhone();

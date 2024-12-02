@@ -126,6 +126,7 @@ public class BufferDeClientes implements Buffer<Cliente> {
 		return modo;
 		
 	}
+
 	public Cliente[] proximosClientes(int quantidade) {
 	    Cliente[] clientes = new Cliente[quantidade];
 	    int i = 0;
@@ -142,5 +143,4 @@ public class BufferDeClientes implements Buffer<Cliente> {
 	    // Retorna um array com a quantidade solicitada ou menos se não houver mais clientes
 	    return Arrays.copyOf(clientes, i);
 	}
-
 }

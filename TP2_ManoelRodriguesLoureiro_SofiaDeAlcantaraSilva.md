@@ -11,17 +11,16 @@
 ## Sumário
 1. [Equipe](#equipe)
 2. [Descrição do Problema](#descrição-do-problema)
-3. [Objetivo](#objetivo)
-4. [Arquitetura da Aplicação com Diagrama de Classes](#arquitetura-da-aplicação-com-diagrama-de-classes)
+3. [Arquitetura da Aplicação com Diagrama de Classes](#arquitetura-da-aplicação-com-diagrama-de-classes)
    1. [Diagrama de Classes](#diagrama-de-classes)
    2. [Descrição da Arquitetura](#descrição-da-arquitetura)
-7. [Descrição dos Principais Algoritmos Utilizados](#descrição-dos-principais-algoritmos-utilizados)
-   1. [Algoritmo 1 - [Nome do Algoritmo]](#algoritmo-1---nome-do-algoritmo)
-   2. [Algoritmo 2 - [Nome do Algoritmo]](#algoritmo-2---nome-do-algoritmo)
-10. [Operações Realizadas](#operações-realizadas)
-11. [Instruções de Execução](#instruções-de-execução)
-12. [Link para o Código-Fonte](#link-para-o-código-fonte)
-13. [Conclusão](#conclusão)
+6. [Descrição dos Principais Algoritmos Utilizados](#descrição-dos-principais-algoritmos-utilizados)
+7.    1. [Algoritmo 1 - [Nome do Algoritmo]](#algoritmo-1---nome-do-algoritmo)
+8.    2. [Algoritmo 2 - [Nome do Algoritmo]](#algoritmo-2---nome-do-algoritmo)
+9. [Operações Realizadas](#operações-realizadas)
+10. [Instruções de Execução](#instruções-de-execução)
+11. [Link para o Código-Fonte](#link-para-o-código-fonte)
+12. [Conclusão](#conclusão)
 
 ---
 ### Equipe
@@ -31,22 +30,102 @@
 
 ## Descrição do Problema
 
-### Contextualização do Problema
+### Contextualização
 
-[Descrição do problema que seu trabalho busca resolver. Explique de forma clara e objetiva qual é o problema, sua relevância e por que ele foi escolhido.]
+O problema que este trabalho busca resolver é a **gestão eficiente de grandes volumes de dados** relacionados aos clientes de uma empresa fictícia. Em um cenário onde a empresa possui mil, milhares ou milhões de clientes cadastrados, a necessidade de armazenar, processar e acessar rapidamente essas informações se torna um desafio. 
+
+Assim, como os dados são armazenados, manipulados e acessados é crucial para garantir que o sistema seja escalável e eficiente, principalmente quando se trata de grandes arquivos de clientes, que não podem ser completamente carregados na memória devido à limitação de recursos.
 
 ### Objetivo do Trabalho
 
-[Descreva os objetivos principais do trabalho. O que você deseja alcançar com a solução proposta.]
+O objetivo deste trabalho é implementar um sistema de gerenciamento de clientes que possibilite realizar as operações básicas de forma eficiente, mesmo com grandes volumes de dados. O sistema deverá ser capaz de:
+
+- **Listar clientes em ordem alfabética:** Usando um algoritmo de ordenação externa, o sistema deve ordenar os dados dos clientes de maneira eficiente e exibi-los ao usuário.
+
+- **Pesquisar clientes:** O sistema deve permitir a pesquisa rápida de clientes com base em nomes ou sobrenomes.
+
+- **Inserir novos clientes:** O sistema deve ser capaz de adicionar novos clientes à base de dados, garantindo que a ordem dos registros seja mantida conforme a ordenação.
+
+- **Remover clientes:** O sistema deve permitir a remoção de registros de clientes de maneira eficiente, ajustando os dados conforme necessário.
+
+A implementação incluirá uma interface gráfica baseada em JFrame, que proporcionará ao usuário uma maneira intuitiva de interagir com o sistema. A interface gráfica também será otimizada para carregar registros de clientes em lotes, minimizando o uso de memória durante a exibição dos dados.
 
 ---
 
 ## Arquitetura da Aplicação com Diagrama de Classes
 
-A arquitetura da aplicação foi projetada para atender aos requisitos do problema, garantindo eficiência, escalabilidade e facilidade de manutenção.
+```mermaid
+classDiagram
+%% Interfaces
+   class ArquivoSequencial { }
 
-### Diagrama de Classes
+   class Buffer { }
 
+%% Models
+   class ArquivoCliente {
+      +lerArquivo()
+      +salvarArquivo()
+   }
+
+   class BufferDeClientes {
+      +adicionarCliente()
+      +removerCliente()
+   }
+
+   class Cliente {
+      -id: int
+      -nome: String
+      +getId()
+      +getNome()
+      +setId(int)
+      +setNome(String)
+   }
+
+%% Utils
+   class GeradorDeArquivosDeClientes {
+      +gerarArquivo()
+   }
+
+   class OrdenarCliente {
+      +ordenarPorNome()
+      +ordenarPorId()
+   }
+
+   class TesteBufferClientes {
+      +testarAdicionar()
+      +testarRemover()
+   }
+
+%% Views
+   class BuscarCliente {
+      +buscarClientePorId()
+      +buscarClientePorNome()
+   }
+
+   class ClienteGUI {
+      +mostrarClientes()
+      +selecionarCliente()
+   }
+
+   class ClienteGUI2 {
+      +exibirDetalhesCliente()
+   }
+
+   class InserirCliente {
+      +inserirNovoCliente()
+   }
+
+%% Relações
+   BufferDeClientes --|> Buffer : Implementa
+   ArquivoCliente --|> ArquivoSequencial: Implementa
+   ClienteGUI --> Cliente : Está associado
+   ClienteGUI2 --> Cliente : Está associado
+   InserirCliente --> Cliente
+   GeradorDeArquivosDeClientes --> ArquivoCliente
+   OrdenarCliente --> Cliente
+   TesteBufferClientes --> BufferDeClientes
+
+```
 _Figura 1: Este diagrama mostra as principais classes envolvidas no sistema e seus relacionamentos._
 
 ### Descrição da Arquitetura
@@ -78,28 +157,21 @@ Descrição: [Breve descrição da tela e o que ela representa no contexto do tr
 Descrição: [Breve descrição da tela e o que ela representa no contexto do trabalho.]
 
 ---
+## Pré-requisitos
+Certifique-se de ter instalado as seguintes ferramentas:
+- **Java Development Kit (JDK)** versão 8 ou superior. Você pode baixar a versão mais recente do JDK do [site oficial da Oracle](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html).
+- **Maven** (certifique-se de que o Maven foi adicionado ao PATH do seu sistema).
 
-## Instruções de Execução
-Para executar o sistema, siga os seguintes passos:
+## **Compilação & Execução**
 
-### Pré-requisitos:
-[Descreva os requisitos do sistema, como versões de software, dependências, etc.]
 
-1. **Instalação:**
-[Descreva como o usuário deve instalar a aplicação ou as bibliotecas necessárias.]
-
-2. **Execução:**
-[Descreva como o usuário deve executar a aplicação. Inclua comandos, arquivos executáveis ou outras orientações.]
-
-3. **Testes e Uso:**
+### **Testes e Uso**
 [Dê exemplos de como o usuário pode testar a aplicação ou utilizar funcionalidades específicas.]
 
 ## Link para o Código-Fonte
 O código-fonte completo da aplicação pode ser acessado no seguinte link:
 
-🔗 
-
-Observação: O código está documentado e comentado para facilitar a compreensão de cada parte do sistema.
+🔗 https://github.com/sofialctv/gestao-de-clientes
 
 ---
 ## Conclusão

@@ -2,10 +2,7 @@ package views;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableRowSorter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,10 +12,10 @@ import models.Cliente;
 
 public class ClienteGUI {
 
-    private BufferDeClientes bufferDeClientes;
+    private final BufferDeClientes bufferDeClientes;
     private JTable tabelaClientes;
     private DefaultTableModel modeloTabela;
-    private List<Cliente> listaClientes;
+    private final List<Cliente> listaClientes;
 
     public ClienteGUI() {
         bufferDeClientes = new BufferDeClientes();
@@ -29,7 +26,7 @@ public class ClienteGUI {
     private void criarInterface() {
         JFrame frame = new JFrame("Gerenciador de Clientes");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800, 600);
+        frame.setSize(1000, 700);
         frame.setLayout(new BorderLayout());
 
         // Painel de controle
@@ -46,7 +43,7 @@ public class ClienteGUI {
         painelControle.add(btnRemover);
         painelControle.add(btnRecarregar);
 
-        frame.add(painelControle, BorderLayout.NORTH);
+        frame.add(painelControle, BorderLayout.SOUTH);
 
         // Modelo da tabela
         modeloTabela = new DefaultTableModel(new Object[]{"#", "Nome", "Sobrenome", "Endereço", "Telefone", "CreditScore"}, 0);
@@ -57,45 +54,18 @@ public class ClienteGUI {
             }
         };
 
-        // Adicionando RowSorter para permitir a ordenação nas colunas de Nome e Sobrenome
-        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(modeloTabela);
-        tabelaClientes.setRowSorter(sorter);
-
         // Ajusta a largura da primeira coluna
-        tabelaClientes.getColumnModel().getColumn(0).setPreferredWidth(20);
+        tabelaClientes.getColumnModel().getColumn(0).setPreferredWidth(10);
 
         JScrollPane scrollPane = new JScrollPane(tabelaClientes);
         frame.add(scrollPane, BorderLayout.CENTER);
 
         // Ação dos botões
-        btnCarregar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                carregarClientes();
-            }
-        });
-
-        btnBuscar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) { new BuscarCliente(listaClientes, modeloTabela);  }
-        });
-
-        btnInserir.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) { new InserirCliente(listaClientes, modeloTabela); }
-        });
-
-        btnRemover.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                removerCliente();
-            }
-        });
-
-        btnRecarregar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {  mostrarTodosClientes();  }
-        });
+        btnCarregar.addActionListener(_ -> carregarClientes());
+        btnBuscar.addActionListener(_ -> new BuscarCliente(listaClientes, modeloTabela));
+        btnInserir.addActionListener(_ -> new InserirCliente(listaClientes, modeloTabela));
+        btnRemover.addActionListener(_ -> removerCliente());
+        btnRecarregar.addActionListener(_ -> mostrarTodosClientes());
 
         frame.setVisible(true);
     }
@@ -117,6 +87,7 @@ public class ClienteGUI {
             // Lê os clientes do buffer e adiciona à tabela
             Cliente cliente;
             int contador = 1; // Contador de linhas
+
             while ((cliente = bufferDeClientes.proximoCliente()) != null) {
                 listaClientes.add(cliente);     // Armazenando os clientes na lista
                 modeloTabela.addRow(new Object[]{contador++, cliente.getNome(), cliente.getSobrenome(), cliente.getEndereco(), cliente.getTelefone(), cliente.getCreditScore()});
@@ -131,7 +102,7 @@ public class ClienteGUI {
         }
     }
 
-    // Adicionando funcionlaidade de remoção de cliente
+    // Adicionando funcionalidade de remoção de cliente
 
     private void removerCliente() {
         int selectedRow = tabelaClientes.getSelectedRow();

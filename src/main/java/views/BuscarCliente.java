@@ -1,10 +1,9 @@
 package views;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.table.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.util.List;
 
 import models.Cliente;
@@ -28,7 +27,7 @@ public class BuscarCliente extends JFrame {
 
         JPanel painelBusca = new JPanel(new GridLayout(2, 1));
 
-        painelBusca.add(new JLabel("Digite o nome ou parte do nome do cliente:"));
+        painelBusca.add(new JLabel("Digite o termo de busca (nome ou sobrenome):"));
         campoBusca = new JTextField();
         painelBusca.add(campoBusca);
 
@@ -58,18 +57,21 @@ public class BuscarCliente extends JFrame {
     }
 
     private void buscarCliente() {
-        String nomeBusca = campoBusca.getText().trim();  // Obtém o nome ou sobrenome buscado
+        String termoBusca = campoBusca.getText().trim();  // Obtém o termo buscado
 
-        if (!nomeBusca.isEmpty()) {
-            modeloTabela.setRowCount(0);  // Limpa a tabela antes de mostrar os resultados
+        if (!termoBusca.isEmpty()) {
+            termoBusca = termoBusca.toLowerCase();  // Converte o termo de busca para minusculo
+            modeloTabela.setRowCount(0);  // Limpa a tabela antes de mostrar os resultados para evitar que resultados anteriores apareçam na tela
             int contador = 1;
 
-            // Percorre a lista de clientes e busca pelo nome ou sobrenome
+            // Percorre a lista de clientes e busca o termo nas colunas
             for (Cliente cliente : listaClientes) {
-                if (cliente.getNome().toLowerCase().contains(nomeBusca.toLowerCase()) ||
-                        cliente.getSobrenome().toLowerCase().contains(nomeBusca.toLowerCase())) {
 
-                    // Adiciona os clientes encontrados à tabela
+                // Verifica se o termo buscado está em alguma coluna da tabela
+                if (cliente.getNome().toLowerCase().contains(termoBusca) ||
+                        cliente.getSobrenome().toLowerCase().contains(termoBusca)) {
+
+                    // Adiciona os clientes encontrados a tabela
                     modeloTabela.addRow(new Object[]{contador++, cliente.getNome(), cliente.getSobrenome(), cliente.getEndereco(), cliente.getTelefone(), cliente.getCreditScore()});
                 }
             }

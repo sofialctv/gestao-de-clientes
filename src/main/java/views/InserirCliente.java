@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.util.List;
 
 import models.Cliente;
+import interfaces.Buffer;
 
 // Criando um formulário básico para inserção de novos clientes
 
@@ -83,6 +84,7 @@ public class InserirCliente extends JFrame {
     }
 
     private void adicionarCliente() {
+
         String nome = campoNome.getText();
         String sobrenome = campoSobrenome.getText();
         String endereco = campoEndereco.getText();
