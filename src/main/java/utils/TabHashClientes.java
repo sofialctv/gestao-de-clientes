@@ -1,3 +1,5 @@
+package utils;
+
 import com.github.javafaker.Faker;
 import models.Cliente;
 

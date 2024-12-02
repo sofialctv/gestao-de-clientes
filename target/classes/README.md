@@ -15,7 +15,7 @@ O sistema utilizará uma interface gráfica com o usuário (GUI) baseada em JFra
 
 - **models.Cliente**: Representa um cliente da empresa, com atributos como nome, sobrenome, telefone, endereço e credit score. Esta classe será a base para armazenar e gerenciar informações dos clientes.
 
-- **GeradorDeArquivosDeClientes**: Classe responsável por gerar arquivos de clientes para testes, possibilitando a criação de um arquivo com até 10 milhões de registros. A geração dos dados será realizada com a biblioteca Java Faker.
+- **utils.GeradorDeArquivosDeClientes**: Classe responsável por gerar arquivos de clientes para testes, possibilitando a criação de um arquivo com até 10 milhões de registros. A geração dos dados será realizada com a biblioteca Java Faker.
 
 - **models.ArquivoCliente**: Implementa a interface `interfaces.ArquivoSequencial` e permite a manipulação dos dados de clientes armazenados em arquivos binários. Essa classe oferece métodos para abrir, fechar, ler e escrever registros de clientes.
 

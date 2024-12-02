@@ -1,21 +1,24 @@
+package utils;
+
 import com.github.javafaker.Faker;
 import models.ArquivoCliente;
 import models.Cliente;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class GeradorDeArquivosDeClientes {
 
     private final ArquivoCliente arquivoCliente;
     private final Faker faker;
+    private final Set<String> nomesGerados; // Set para armazenar nomes únicos
 
     // Construtor que inicializa o gerador de arquivos de clientes
     public GeradorDeArquivosDeClientes() {
         this.arquivoCliente = new ArquivoCliente();
         this.faker = new Faker();
+        this.nomesGerados = new HashSet<>(); // Inicializa o conjunto de nomes gerados
     }
 
     // Método que gera um arquivo binário com um número especificado de registros de clientes
@@ -47,13 +50,27 @@ public class GeradorDeArquivosDeClientes {
 
     // Método para gerar um cliente fictício
     private Cliente gerarClienteFicticio() {
-        String nome = faker.name().firstName();
+        String nomeCompleto = gerarNomeUnico();
+
         String sobrenome = faker.name().lastName();
         String endereco = faker.address().fullAddress();
         String telefone = faker.phoneNumber().cellPhone();
         int creditScore = faker.number().numberBetween(0, 100);
 
-        return new Cliente(nome, sobrenome, endereco, telefone, creditScore);
+        return new Cliente(nomeCompleto, sobrenome, endereco, telefone, creditScore);
+    }
+
+    // Método para gerar um nome único
+    private String gerarNomeUnico() {
+        String nomeCompleto;
+        do {
+            String nome = faker.name().firstName();
+            String sobrenome = faker.name().lastName();
+            nomeCompleto = nome + " " + sobrenome; // Nome completo (primeiro nome + sobrenome)
+        } while (nomesGerados.contains(nomeCompleto)); // Verifica se o nome já foi gerado
+
+        nomesGerados.add(nomeCompleto); // Adiciona o nome único ao conjunto
+        return nomeCompleto;
     }
 
     // Método que gera um grande arquivo de clientes com até 100 milhões de registros
