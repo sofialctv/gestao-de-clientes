@@ -1,6 +1,7 @@
 package utils;
 
 import java.io.*;
+import java.util.Scanner;
 import java.util.*;
 
 public class ExternalSort {
@@ -181,14 +182,35 @@ public class ExternalSort {
     }
 
     public static void main(String[] args) {
-        // Exemplo de uso:
-        File inputFile = new File("clientes.bin");
-        File outputFile = new File("saida_ordenada.bin");
+        // Cria um scanner para leitura da entrada do usuário
+        Scanner scanner = new Scanner(System.in);
+
+        // Solicita o arquivo de entrada ao usuário
+        System.out.println("Digite o caminho do arquivo de entrada:");
+        String inputFilePath = scanner.nextLine();
+
+        // Solicita o arquivo de saída ao usuário
+        System.out.println("Digite o caminho do arquivo de saída:");
+        String outputFilePath = scanner.nextLine();
+
+        // Cria os arquivos com base nos caminhos fornecidos
+        File inputFile = new File(inputFilePath);
+        File outputFile = new File(outputFilePath);
+
+        // Verifica se o arquivo de entrada existe
+        if (!inputFile.exists()) {
+            System.out.println("O arquivo de entrada não existe: " + inputFile.getAbsolutePath());
+            System.exit(1);
+        }
+
+        // Executa a ordenação
         try {
             sort(inputFile, outputFile);
             System.out.println("Ordenação concluída. Arquivo de saída: " + outputFile.getAbsolutePath());
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            scanner.close();  // Fecha o scanner
         }
     }
 }
