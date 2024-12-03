@@ -2,7 +2,7 @@ package models;
 
 import java.io.Serializable;
 
-public class Cliente implements Serializable {
+public class Cliente implements Serializable, Comparable<Cliente> {
     // Serial Version UID para controle de versão da serialização
     private static final long serialVersionUID = 1L;
 
@@ -76,5 +76,12 @@ public class Cliente implements Serializable {
                 ", telefone='" + telefone + '\'' +
                 ", creditScore=" + creditScore +
                 '}';
+    }
+
+    @Override
+    public int compareTo(Cliente other) {
+        String nomeCompleto = this.nome + " " + this.sobrenome;
+        String otherNomeCompleto = other.nome + " " + other.sobrenome;
+        return nomeCompleto.compareTo(otherNomeCompleto);
     }
 }
