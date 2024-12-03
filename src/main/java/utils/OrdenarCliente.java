@@ -1,109 +1,139 @@
-//package utils;
-//
-//public class OrdenarCliente {
-//}
-//
-//]
-//        package services;
-//
-//import interfaces.ArquivoSequencial;
-//import interfaces.Buffer;
-//import models.Cliente;
-//
-//import java.io.*;
-//        import java.util.*;
-//
-//public class MultiWayMergeSort {
-//
-//    private static final int TamanhoBloco = 100; // Define o tamanho de cada bloco de clientes a ser processado
-//
-//    // Método para ordenar o arquivo
-//    public void ordenarArquivo(String nomeArquivoEntrada, String nomeArquivoSaida, ArquivoSequencial<Cliente> arquivoSequencial, Buffer<Cliente> buffer) throws IOException, ClassNotFoundException {
-//        // Dividir em blocos e ordenar os blocos
-//        List<String> arquivosTemporarios = dividirEOrdenarEmBlocos(nomeArquivoEntrada, arquivoSequencial, buffer);
-//
-//        // Mesclar os blocos ordenados
-//        mesclarArquivos(arquivosTemporarios, nomeArquivoSaida, arquivoSequencial, buffer);
-//
-//        // Limpeza dos arquivos temporários
-//        for (String arquivoTemp : arquivosTemporarios) {
-//            new File(arquivoTemp).delete(); // Deleta arquivos temporários após o merge
-//        }
-//    }
-//
-//    // Método para dividir o arquivo em blocos e ordená-los
-//    private List<String> dividirEOrdenarEmBlocos(String nomeArquivoEntrada, ArquivoSequencial<Cliente> arquivoSequencial, Buffer<Cliente> buffer) throws IOException, ClassNotFoundException {
-//        List<String> arquivosTemporarios = new ArrayList<>();
-//        arquivoSequencial.abrirArquivo(nomeArquivoEntrada, "r", Cliente.class);
-//        int contadorBloco = 0;
-//
-//        while (true) {
-//            List<Cliente> clientes = arquivoSequencial.leiaDoArquivo(TamanhoBloco);
-//            if (clientes.isEmpty()) break; // Não há mais registros para ler
-//
-//            // Ordena os clientes por nome
-//            clientes.sort(Comparator.comparing(Cliente::getNome));
-//
-//            // Cria um arquivo temporário para o bloco ordenado
-//            String nomeArquivoTemp = "temp_bloco_" + contadorBloco + ".dat";
-//            arquivosTemporarios.add(nomeArquivoTemp);
-//
-//            // Grava o bloco ordenado no arquivo temporário
-//            ArquivoSequencial<Cliente> tempArquivo = new ArquivoSequencialImpl<>();
-//            tempArquivo.abrirArquivo(nomeArquivoTemp, "rw", Cliente.class);
-//            tempArquivo.escreveNoArquivo(clientes);
-//            tempArquivo.fechaArquivo();
-//
-//            contadorBloco++;
-//        }
-//
-//        arquivoSequencial.fechaArquivo();
-//        return arquivosTemporarios;
-//    }
-//
-//    // Método para mesclar os arquivos temporários
-//    private void mesclarArquivos(List<String> arquivosTemporarios, String nomeArquivoSaida, ArquivoSequencial<Cliente> arquivoSequencial, Buffer<Cliente> buffer) throws IOException, ClassNotFoundException {
-//        PriorityQueue<Cliente> pq = new PriorityQueue<>(Comparator.comparing(Cliente::getNome));
-//
-//        // Abre todos os arquivos temporários para leitura
-//        List<ArquivoSequencial<Cliente>> arquivos = new ArrayList<>();
-//        for (String arquivo : arquivosTemporarios) {
-//            ArquivoSequencial<Cliente> tempArquivo = new ArquivoSequencialImpl<>();
-//            tempArquivo.abrirArquivo(arquivo, "r", Cliente.class);
-//            arquivos.add(tempArquivo);
-//
-//            // Carrega o primeiro cliente de cada arquivo para a fila de prioridade
-//            List<Cliente> clientesTemp = tempArquivo.leiaDoArquivo(1);
-//            if (!clientesTemp.isEmpty()) {
-//                pq.add(clientesTemp.get(0));
-//            }
-//        }
-//
-//        // Cria o arquivo de saída para os dados ordenados
-//        ArquivoSequencial<Cliente> arquivoSaida = new ArquivoSequencialImpl<>();
-//        arquivoSaida.abrirArquivo(nomeArquivoSaida, "rw", Cliente.class);
-//
-//        // Mescla os dados utilizando a fila de prioridade
-//        while (!pq.isEmpty()) {
-//            Cliente cliente = pq.poll();
-//            arquivoSaida.escreveNoArquivo(Collections.singletonList(cliente));
-//
-//            // Carrega o próximo cliente do arquivo correspondente
-//            for (int i = 0; i < arquivos.size(); i++) {
-//                ArquivoSequencial<Cliente> tempArquivo = arquivos.get(i);
-//                List<Cliente> clientesTemp = tempArquivo.leiaDoArquivo(1);
-//                if (!clientesTemp.isEmpty() && clientesTemp.get(0).getNome().equals(cliente.getNome())) {
-//                    pq.add(clientesTemp.get(0));
-//                    break;
-//                }
-//            }
-//        }
-//
-//        // Fecha os arquivos
-//        for (ArquivoSequencial<Cliente> tempArquivo : arquivos) {
-//            tempArquivo.fechaArquivo();
-//        }
-//
-//        arquivoSaida.fechaArquivo();
-//    }
-//}
+package utils;
+
+import models.Cliente;
+
+import java.io.*;
+import java.util.*;
+
+public class OrdenarCliente {
+
+    private static final int CHUNK_SIZE = 100000; // Tamanho de cada parte (ajuste conforme a memória disponível)
+
+    public void sort(String inputFile, String outputFile) throws IOException, ClassNotFoundException {
+        List<String> tempFiles = createSortedChunks(inputFile);
+        mergeSortedChunks(tempFiles, outputFile);
+    }
+
+    private List<String> createSortedChunks(String inputFile) throws IOException, ClassNotFoundException {
+        List<String> tempFiles = new ArrayList<>();
+
+        ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(inputFile)));
+
+        boolean eof = false;
+        int chunkIndex = 0;
+
+        while (!eof) {
+            List<Cliente> chunk = new ArrayList<>(CHUNK_SIZE);
+            try {
+                for (int i = 0; i < CHUNK_SIZE; i++) {
+                    Cliente cliente = (Cliente) ois.readObject();
+                    chunk.add(cliente);
+                }
+            } catch (EOFException e) {
+                eof = true;
+            }
+
+            if (!chunk.isEmpty()) {
+                // Ordena a parte
+                Collections.sort(chunk);
+
+                // Escreve a parte ordenada em um arquivo temporário
+                String tempFileName = "tempfile_" + chunkIndex + ".dat";
+                ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(tempFileName)));
+                for (Cliente cliente : chunk) {
+                    oos.writeObject(cliente);
+                }
+                oos.close();
+
+                tempFiles.add(tempFileName);
+                chunkIndex++;
+            }
+        }
+
+        ois.close();
+        return tempFiles;
+    }
+
+    private void mergeSortedChunks(List<String> tempFiles, String outputFile) throws IOException, ClassNotFoundException {
+        PriorityQueue<ClienteEntry> pq = new PriorityQueue<>();
+
+        List<ObjectInputStream> inputStreams = new ArrayList<>();
+        try {
+            // Abre os streams de entrada para cada arquivo temporário
+            for (int i = 0; i < tempFiles.size(); i++) {
+                ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(tempFiles.get(i))));
+                inputStreams.add(ois);
+                try {
+                    Cliente cliente = (Cliente) ois.readObject();
+                    pq.add(new ClienteEntry(cliente, i));
+                } catch (EOFException e) {
+                    // Arquivo vazio
+                }
+            }
+
+            // Abre o stream de saída para o arquivo ordenado final
+            ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(outputFile)));
+
+            // Mescla os objetos Cliente
+            while (!pq.isEmpty()) {
+                ClienteEntry entry = pq.poll();
+                Cliente cliente = entry.cliente;
+                int index = entry.fileIndex;
+
+                // Escreve o cliente no arquivo de saída
+                oos.writeObject(cliente);
+
+                // Lê o próximo cliente do mesmo arquivo
+                try {
+                    Cliente nextCliente = (Cliente) inputStreams.get(index).readObject();
+                    pq.add(new ClienteEntry(nextCliente, index));
+                } catch (EOFException e) {
+                    // Fim do arquivo
+                }
+            }
+
+            oos.close();
+        } finally {
+            // Fecha todos os streams de entrada
+            for (ObjectInputStream ois : inputStreams) {
+                ois.close();
+            }
+
+            // Deleta os arquivos temporários
+            for (String tempFileName : tempFiles) {
+                File file = new File(tempFileName);
+                file.delete();
+            }
+        }
+    }
+
+    private static class ClienteEntry implements Comparable<ClienteEntry> {
+        Cliente cliente;
+        int fileIndex;
+
+        public ClienteEntry(Cliente cliente, int fileIndex) {
+            this.cliente = cliente;
+            this.fileIndex = fileIndex;
+        }
+
+        @Override
+        public int compareTo(ClienteEntry other) {
+            return this.cliente.compareTo(other.cliente);
+        }
+    }
+
+    public static void main(String[] args){
+        // Nome do arquivo gerado anteriormente pelo GeradorDeArquivosDeClientes
+        String inputFile = "clientes";
+        String outputFile = "clientes_ordenados";
+
+        OrdenarCliente sorter = new OrdenarCliente();
+        try {
+            sorter.sort(inputFile, outputFile);
+            System.out.println("Ordenação concluída com sucesso!");
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+}
