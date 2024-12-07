@@ -124,7 +124,7 @@ public class OrdenarCliente {
 
     public static void main(String[] args){
         // Nome do arquivo gerado anteriormente pelo GeradorDeArquivosDeClientes
-        String inputFile = "clientes";
+        String inputFile = "clientes_10000";
         String outputFile = STR."\{inputFile}_ordenados";
 
         OrdenarCliente sorter = new OrdenarCliente();

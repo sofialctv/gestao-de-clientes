@@ -8,9 +8,7 @@ import java.awt.event.ActionListener;
 import java.util.List;
 
 import models.Cliente;
-import interfaces.Buffer;
-
-// Criando um formulário básico para inserção de novos clientes
+import models.BufferDeClientes;
 
 public class InserirCliente extends JFrame {
 
@@ -94,12 +92,23 @@ public class InserirCliente extends JFrame {
         try {
             int creditScore = Integer.parseInt(creditScoreStr);
 
-            // Cria o novo cliente e o adiciona na lista de clientes
+            // Cria o novo cliente
             Cliente novoCliente = new Cliente(nome, sobrenome, endereco, telefone, creditScore);
-            listaClientes.add(novoCliente);
+
+            // Criando uma instância de BufferDeClientes para acessar métodos não-estáticos
+            BufferDeClientes bufferDeClientes = new BufferDeClientes();
+
+            // Verifica se o buffer está no modo de escrita
+            if (!bufferDeClientes.getModo().equals("escrita")) {
+                JOptionPane.showMessageDialog(this, "O buffer não está no modo de escrita. Cliente não pode ser inserido.");
+                return;
+            }
+
+            // Adiciona o novo cliente ao buffer
+            bufferDeClientes.adicionaAoBuffer(novoCliente);
 
             // Atualiza a tabela de clientes no ClienteGUI
-            modeloTabela.addRow(new Object[]{listaClientes.size(), nome, sobrenome, endereco, telefone, creditScore});
+            modeloTabela.addRow(new Object[]{modeloTabela.getRowCount() + 1, nome, sobrenome, endereco, telefone, creditScore});
 
             // Exibe mensagem de sucesso e fecha o formulário
             JOptionPane.showMessageDialog(this, "Cliente inserido com sucesso!");

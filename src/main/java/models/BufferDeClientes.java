@@ -13,7 +13,7 @@ public class BufferDeClientes implements Buffer<Cliente> {
 
     private ArquivoSequencial<Cliente> arquivoSequencial;
     private Queue<Cliente> buffer;
-    private final int TAMANHO_BUFFER = 100; // Tamanho máximo do buffer
+    private static final int TAMANHO_BUFFER = 100; // Tamanho máximo do buffer
     private String modo; // "leitura" ou "escrita"
 
     public BufferDeClientes() {
@@ -43,20 +43,19 @@ public class BufferDeClientes implements Buffer<Cliente> {
         }
     }
 
- // Carrega dados do arquivo para o buffer (modo leitura)
+    // Carrega dados do arquivo para o buffer (modo leitura)
     @Override
     public void carregaBuffer() {
         if (!modo.equals("leitura")) {
-            throw new IllegalStateException("interfaces.Buffer não está em modo de leitura!");
+            throw new IllegalStateException("Buffer não está em modo de leitura!");
         }
 
         try {
-            // Lê uma lista de clientes do arquivo e os coloca na fila (buffer)
             List<Cliente> clientesLidos = arquivoSequencial.leiaDoArquivo(TAMANHO_BUFFER);
             if (clientesLidos != null) {
                 for (Object obj : clientesLidos) {
                     if (obj instanceof Cliente) {
-                        buffer.add((Cliente) obj); // Adiciona clientes ao buffer
+                        buffer.add((Cliente) obj);
                     }
                 }
             }
@@ -65,15 +64,16 @@ public class BufferDeClientes implements Buffer<Cliente> {
         } catch (ClassNotFoundException e) {
             System.err.println("Classe não encontrada: " + e.getMessage());
         }
-    }    // Escreve os dados do buffer no arquivo (modo escrita)
+    }
+
+    // Escreve os dados do buffer no arquivo (modo escrita)
     @Override
     public void escreveBuffer() {
         if (!modo.equals("escrita")) {
-            throw new IllegalStateException("interfaces.Buffer não está em modo de escrita!");
+            throw new IllegalStateException("Buffer não está em modo de escrita!");
         }
 
         try {
-            // Escreve todos os clientes do buffer para o arquivo
             arquivoSequencial.escreveNoArquivo(new LinkedList<>(buffer));
             buffer.clear(); // Limpa o buffer após a escrita
         } catch (IOException e) {
@@ -94,7 +94,7 @@ public class BufferDeClientes implements Buffer<Cliente> {
     // Adiciona um cliente ao buffer (modo escrita)
     public void adicionaAoBuffer(Cliente cliente) {
         if (!modo.equals("escrita")) {
-            throw new IllegalStateException("interfaces.Buffer não está em modo de escrita!");
+            throw new IllegalStateException("Buffer não está em modo de escrita!");
         }
 
         buffer.add(cliente);
@@ -108,7 +108,7 @@ public class BufferDeClientes implements Buffer<Cliente> {
     // Lê o próximo cliente do buffer (modo leitura)
     public Cliente proximoCliente() {
         if (!modo.equals("leitura")) {
-            throw new IllegalStateException("interfaces.Buffer não está em modo de leitura!");
+            throw new IllegalStateException("Buffer não está em modo de leitura!");
         }
 
         if (buffer.isEmpty()) {
@@ -121,26 +121,26 @@ public class BufferDeClientes implements Buffer<Cliente> {
         return null; // Retorna null se não houver mais clientes
     }
 
-	public String getModo() {
-		// TODO Auto-generated method stub
-		return modo;
-		
-	}
+    // Obtém o modo atual (leitura ou escrita)
+    public String getModo() {
+        return modo;
+    }
 
-	public Cliente[] proximosClientes(int quantidade) {
-	    Cliente[] clientes = new Cliente[quantidade];
-	    int i = 0;
+    // Retorna os próximos clientes no buffer até o número solicitado
+    public Cliente[] proximosClientes(int quantidade) {
+        Cliente[] clientes = new Cliente[quantidade];
+        int i = 0;
 
-	    while (i < quantidade) {
-	        Cliente cliente = proximoCliente(); // Obtém o próximo cliente
-	        if (cliente == null) {
-	            break; // Se não houver mais clientes, sai do loop
-	        }
-	        clientes[i] = cliente; // Adiciona o cliente ao array
-	        i++;
-	    }
+        while (i < quantidade) {
+            Cliente cliente = proximoCliente(); // Obtém o próximo cliente
+            if (cliente == null) {
+                break; // Se não houver mais clientes, sai do loop
+            }
+            clientes[i] = cliente; // Adiciona o cliente ao array
+            i++;
+        }
 
-	    // Retorna um array com a quantidade solicitada ou menos se não houver mais clientes
-	    return Arrays.copyOf(clientes, i);
-	}
+        // Retorna um array com a quantidade solicitada ou menos se não houver mais clientes
+        return Arrays.copyOf(clientes, i);
+    }
 }

@@ -5,18 +5,20 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import models.ArquivoCliente;
 import models.BufferDeClientes;
 import models.Cliente;
+import utils.OrdenarCliente;
 
 public class ClienteGUI2 extends JFrame {
 
     private JTable table;
     private DefaultTableModel tableModel;
-    private BufferDeClientes bufferDeClientes;
+    private final BufferDeClientes bufferDeClientes;
     private final int TAMANHO_BUFFER = 10000;
     private int registrosCarregados = 0; // Contador de registros já carregados
     private String arquivoSelecionado;
@@ -27,7 +29,7 @@ public class ClienteGUI2 extends JFrame {
 
     public ClienteGUI2() {
         setTitle("Gerenciamento de Clientes");
-        setSize(1000, 800);
+        setSize(1366, 768);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         bufferDeClientes = new BufferDeClientes();
@@ -58,7 +60,6 @@ public class ClienteGUI2 extends JFrame {
         JButton btnBuscar = new JButton("Buscar Cliente");
         JButton btnInserir = new JButton("Inserir Cliente");
         JButton btnRemover = new JButton("Remover Cliente");
-        JButton btnRecarregar = new JButton("Recarregar");
         JButton btnAlfabeto = new JButton("Ordenar Alfabeticamente");
 
         tableModel = new DefaultTableModel(new String[]{"#", "Nome", "Sobrenome", "Telefone", "Endereço", "Credit Score"}, 0);
@@ -86,14 +87,12 @@ public class ClienteGUI2 extends JFrame {
         btnBuscar.addActionListener(_ -> new BuscarCliente(listaClientes, tableModel));
         btnInserir.addActionListener(_ -> new InserirCliente(listaClientes, tableModel));
         // btnRemover.addActionListener(_ -> removerCliente());
-        // btnRecarregar.addActionListener(_ -> mostrarTodosClientes());
-        // btnAlfabeto.addActionListener(_ -> ordenarAlfabeticamente(listaClientes, tableModel));
+        btnAlfabeto.addActionListener(_ -> ordenarAlfabeticamente());
 
         btn.add(btnCarregar);
         btn.add(btnBuscar);
         btn.add(btnInserir);
         btn.add(btnRemover);
-        btn.add(btnRecarregar);
         btn.add(btnAlfabeto);
 
         panel.add(scrollPane, BorderLayout.CENTER);
@@ -111,6 +110,35 @@ public class ClienteGUI2 extends JFrame {
                 }
             }
             registrosCarregados += clientes.length; // Atualiza o contador
+        }
+    }
+
+    private void ordenarAlfabeticamente() {
+        if (!arquivoCarregado) {
+            JOptionPane.showMessageDialog(this, "Nenhum arquivo foi carregado.");
+            return;
+        }
+
+        // Define output file name
+        String outputFile = arquivoSelecionado + "_ordenado.dat";
+
+        try {
+            // Call OrdenarCliente to sort the file
+            OrdenarCliente ordenarCliente = new OrdenarCliente();
+            ordenarCliente.sort(arquivoSelecionado, outputFile);
+
+            JOptionPane.showMessageDialog(this, "Clientes ordenados com sucesso!");
+
+            // Clear the table before reloading the sorted data
+            tableModel.setRowCount(0);
+
+            // Reload the sorted file into the table
+            bufferDeClientes.inicializaBuffer("leitura", outputFile);
+            carregarMaisClientes();
+
+        } catch (ClassNotFoundException | IOException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Erro ao ordenar clientes: " + e.getMessage());
         }
     }
 
