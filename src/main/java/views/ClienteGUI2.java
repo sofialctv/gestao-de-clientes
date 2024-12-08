@@ -3,8 +3,6 @@ package views;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +11,7 @@ import models.ArquivoCliente;
 import models.BufferDeClientes;
 import models.Cliente;
 import utils.OrdenarCliente;
+import utils.GeradorDeArquivosDeClientes;  // Importando o GeradorDeArquivosDeClientes
 
 public class ClienteGUI2 extends JFrame {
 
@@ -24,10 +23,11 @@ public class ClienteGUI2 extends JFrame {
     private String arquivoSelecionado;
     private boolean arquivoCarregado = false; // Para verificar se o arquivo foi carregado
     private final List<Cliente> listaClientes;
+    private JTextField campoPesquisa; // Campo de pesquisa para "Pesquisar Cliente"
 
     public ClienteGUI2() {
         setTitle("Gerenciamento de Clientes");
-        setSize(1366, 768);
+        setSize(800, 600); // Reduzido o tamanho da janela
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         bufferDeClientes = new BufferDeClientes();
@@ -50,68 +50,39 @@ public class ClienteGUI2 extends JFrame {
         }
     }
 
-    private JTextField campoPesquisa; // Campo de pesquisa para "Pesquisar Cliente"
-
     private void criarInterface() {
         JPanel panel = new JPanel(new BorderLayout());
 
         // Painel de botões na parte inferior
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
+        // Botão para carregar clientes
         JButton btnCarregarCliente = new JButton("Carregar Clientes");
-        JButton btnPesquisarCliente = new JButton("Pesquisar");
-        JButton btnInserirCliente = new JButton("Inserir");
-        JButton btnRemoverCliente = new JButton("Remover");
+        JButton btnInserirCliente = new JButton("Inserir Cliente");
+        JButton btnRemoverCliente = new JButton("Remover Cliente");
         JButton btnOrdenarClientes = new JButton("Ordenar Clientes");
+        JButton btnGerarArquivoClientes = new JButton("Gerar Arquivo de Clientes");  // Novo botão
 
         // Inicialmente, só o botão de carregar é visível
-        btnPesquisarCliente.setVisible(false);
         btnInserirCliente.setVisible(false);
         btnRemoverCliente.setVisible(false);
         btnOrdenarClientes.setVisible(false);
+        btnGerarArquivoClientes.setVisible(true);
 
         // Tabela para mostrar os clientes
         tableModel = new DefaultTableModel(new String[]{"#", "Nome", "Sobrenome", "Telefone", "Endereço", "Credit Score"}, 0);
         table = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(table);
 
-        // Listener para rolagem (carregar mais clientes ao rolar)
-        scrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
-            @Override
-            public void adjustmentValueChanged(AdjustmentEvent e) {
-                if (!scrollPane.getVerticalScrollBar().getValueIsAdjusting()) {
-                    // Verifica se estamos no final da tabela e se o arquivo foi carregado
-                    if (arquivoCarregado &&
-                            scrollPane.getVerticalScrollBar().getValue() +
-                                    scrollPane.getVerticalScrollBar().getVisibleAmount() >=
-                                    scrollPane.getVerticalScrollBar().getMaximum()) {
-                        carregarMaisClientes();
-                    }
-                }
-            }
-        });
-
         // Ação para carregar clientes
         btnCarregarCliente.addActionListener(e -> {
             carregarArquivo();
-
-            // Mostrar os outros botões após carregar o arquivo
-            btnPesquisarCliente.setVisible(true);
             btnInserirCliente.setVisible(true);
             btnRemoverCliente.setVisible(true);
             btnOrdenarClientes.setVisible(true);
         });
 
-        // Ação para buscar cliente
-        btnPesquisarCliente.addActionListener(e -> {
-            if (arquivoSelecionado == null) {
-                JOptionPane.showMessageDialog(this, "Nenhum arquivo selecionado");
-                return;
-            }
-            new PesquisarCliente(bufferDeClientes, tableModel, arquivoSelecionado);
-        });
-
-        // Ação para inserir novo cliente
+        // Ação para inserir cliente
         btnInserirCliente.addActionListener(e -> new InserirCliente(listaClientes, tableModel, bufferDeClientes));
 
         // Ação para remover cliente
@@ -125,14 +96,18 @@ public class ClienteGUI2 extends JFrame {
         });
 
         // Ação para ordenar clientes
-        btnOrdenarClientes.addActionListener( e -> ordenarAlfabeticamente());
+        btnOrdenarClientes.addActionListener(e -> ordenarAlfabeticamente());
+
+        // Ação para gerar o arquivo de clientes
+        btnGerarArquivoClientes.addActionListener(e -> gerarArquivoClientes());
 
         // Adicionando botões ao painel
+        btnPanel.add(btnGerarArquivoClientes);
         btnPanel.add(btnCarregarCliente);
         btnPanel.add(btnInserirCliente);
         btnPanel.add(btnRemoverCliente);
         btnPanel.add(btnOrdenarClientes);
-
+        
         panel.add(scrollPane, BorderLayout.CENTER);
         panel.add(btnPanel, BorderLayout.SOUTH);
 
@@ -140,15 +115,20 @@ public class ClienteGUI2 extends JFrame {
     }
 
     private void carregarMaisClientes() {
-        // Carrega apenas 10.000 registros de cada vez
-        Cliente[] clientes = bufferDeClientes.proximosClientes(TAMANHO_BUFFER); // Chama o método com o tamanho do buffer
+        Cliente[] clientes = bufferDeClientes.proximosClientes(TAMANHO_BUFFER);
         if (clientes != null && clientes.length > 0) {
             for (Cliente cliente : clientes) {
-                if (cliente != null) { // Verifica se o cliente não é nulo
-                    tableModel.addRow(new Object[]{tableModel.getRowCount() + 1, cliente.getNome(), cliente.getSobrenome(), cliente.getTelefone(), cliente.getEndereco(), cliente.getCreditScore()});
+                if (cliente != null) {
+                    tableModel.addRow(new Object[]{
+                            tableModel.getRowCount() + 1,
+                            cliente.getNome(),
+                            cliente.getSobrenome(),
+                            cliente.getTelefone(),
+                            cliente.getEndereco(),
+                            cliente.getCreditScore()});
                 }
             }
-            registrosCarregados += clientes.length; // Atualiza o contador
+            registrosCarregados += clientes.length;
         }
     }
 
@@ -158,27 +138,54 @@ public class ClienteGUI2 extends JFrame {
             return;
         }
 
-        // Define output file name
         String outputFile = arquivoSelecionado + "_ordenado.dat";
 
         try {
-            // Call OrdenarCliente to sort the file
             OrdenarCliente ordenarCliente = new OrdenarCliente();
             ordenarCliente.sort(arquivoSelecionado, outputFile);
 
             JOptionPane.showMessageDialog(this, "Clientes ordenados com sucesso!");
-
-            // Clear the table before reloading the sorted data
             tableModel.setRowCount(0);
 
-            // Reload the sorted file into the table
             bufferDeClientes.inicializaBuffer("leitura", outputFile);
             carregarMaisClientes();
-
         } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Erro ao ordenar clientes: " + e.getMessage());
         }
+    }
+
+    // Método para gerar o arquivo de clientes fictícios usando a classe GeradorDeArquivosDeClientes
+    private void gerarArquivoClientes() {
+        // Solicita o nome do arquivo ao usuário
+        String nomeArquivo = JOptionPane.showInputDialog(this, "Digite o nome do arquivo de saída:");
+
+        // Verifica se o usuário forneceu um nome válido
+        if (nomeArquivo == null || nomeArquivo.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Nome de arquivo inválido. Por favor, insira um nome válido.");
+            return;
+        }
+
+        // Solicita a quantidade de clientes ao usuário
+        String inputQuantidade = JOptionPane.showInputDialog(this, "Digite a quantidade de clientes a ser gerada:");
+        int quantidadeClientes;
+
+        // Valida a quantidade de clientes
+        try {
+            quantidadeClientes = Integer.parseInt(inputQuantidade);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Entrada inválida. Por favor, insira um número.");
+            return;
+        }
+
+        // Instancia o gerador de arquivos de clientes
+        GeradorDeArquivosDeClientes gerador = new GeradorDeArquivosDeClientes();
+
+        // Gera o arquivo de clientes com base no nome e quantidade fornecida
+        gerador.geraGrandeDataSetDeClientes(nomeArquivo, quantidadeClientes);
+
+        // Notifica o usuário que o arquivo foi gerado com sucesso
+        JOptionPane.showMessageDialog(this, "Arquivo de clientes gerado com sucesso!");
     }
 
     public static void main(String[] args) {
