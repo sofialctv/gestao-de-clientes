@@ -1,14 +1,14 @@
 package views;
 
+import models.BufferDeClientes;
+import models.Cliente;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
-
-import models.Cliente;
-import models.BufferDeClientes;
 
 public class InserirCliente extends JFrame {
 
@@ -19,17 +19,19 @@ public class InserirCliente extends JFrame {
     private JTextField campoCreditScore;
     private List<Cliente> listaClientes;
     private DefaultTableModel modeloTabela;
+    private BufferDeClientes bufferDeClientes; // Agora passamos o BufferDeClientes
 
-    public InserirCliente(List<Cliente> listaClientes, DefaultTableModel modeloTabela) {
+    public InserirCliente(List<Cliente> listaClientes, DefaultTableModel modeloTabela, BufferDeClientes bufferDeClientes) {
         this.listaClientes = listaClientes;
         this.modeloTabela = modeloTabela;
+        this.bufferDeClientes = bufferDeClientes; // Usando o BufferDeClientes passado no construtor
         criarFormulario();
     }
 
     private void criarFormulario() {
-        setTitle("Inserir Novo Cliente");
+        setTitle("Inserindo Novo Cliente");
         setSize(400, 300);
-        setLayout(new GridLayout(6, 2));
+        setLayout(new GridLayout(6, 2, 5,5));
 
         // Campos do formulário
         add(new JLabel("Nome:"));
@@ -82,7 +84,6 @@ public class InserirCliente extends JFrame {
     }
 
     private void adicionarCliente() {
-
         String nome = campoNome.getText();
         String sobrenome = campoSobrenome.getText();
         String endereco = campoEndereco.getText();
@@ -95,11 +96,8 @@ public class InserirCliente extends JFrame {
             // Cria o novo cliente
             Cliente novoCliente = new Cliente(nome, sobrenome, endereco, telefone, creditScore);
 
-            // Criando uma instância de BufferDeClientes para acessar métodos não-estáticos
-            BufferDeClientes bufferDeClientes = new BufferDeClientes();
-
             // Verifica se o buffer está no modo de escrita
-            if (!bufferDeClientes.getModo().equals("escrita")) {
+            if (bufferDeClientes.getModo() == null || !bufferDeClientes.getModo().equals("escrita")) {
                 JOptionPane.showMessageDialog(this, "O buffer não está no modo de escrita. Cliente não pode ser inserido.");
                 return;
             }

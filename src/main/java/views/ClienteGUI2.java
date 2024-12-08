@@ -23,9 +23,7 @@ public class ClienteGUI2 extends JFrame {
     private int registrosCarregados = 0; // Contador de registros já carregados
     private String arquivoSelecionado;
     private boolean arquivoCarregado = false; // Para verificar se o arquivo foi carregado
-
     private final List<Cliente> listaClientes;
-
 
     public ClienteGUI2() {
         setTitle("Gerenciamento de Clientes");
@@ -52,21 +50,32 @@ public class ClienteGUI2 extends JFrame {
         }
     }
 
+    private JTextField campoPesquisa; // Campo de pesquisa para "Pesquisar Cliente"
+
     private void criarInterface() {
         JPanel panel = new JPanel(new BorderLayout());
-        JPanel btn = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
-        JButton btnCarregar = new JButton("Carregar Clientes");
-        JButton btnBuscar = new JButton("Buscar Cliente");
-        JButton btnInserir = new JButton("Inserir Cliente");
-        JButton btnRemover = new JButton("Remover Cliente");
-        JButton btnAlfabeto = new JButton("Ordenar Alfabeticamente");
+        // Painel de botões na parte inferior
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
+        JButton btnCarregarCliente = new JButton("Carregar Clientes");
+        JButton btnPesquisarCliente = new JButton("Pesquisar");
+        JButton btnInserirCliente = new JButton("Inserir");
+        JButton btnRemoverCliente = new JButton("Remover");
+        JButton btnOrdenarClientes = new JButton("Ordenar Clientes");
+
+        // Inicialmente, só o botão de carregar é visível
+        btnPesquisarCliente.setVisible(false);
+        btnInserirCliente.setVisible(false);
+        btnRemoverCliente.setVisible(false);
+        btnOrdenarClientes.setVisible(false);
+
+        // Tabela para mostrar os clientes
         tableModel = new DefaultTableModel(new String[]{"#", "Nome", "Sobrenome", "Telefone", "Endereço", "Credit Score"}, 0);
         table = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(table);
 
-        // Adiciona um listener ao JScrollPane para carregar mais clientes ao rolar
+        // Listener para rolagem (carregar mais clientes ao rolar)
         scrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
             @Override
             public void adjustmentValueChanged(AdjustmentEvent e) {
@@ -82,21 +91,51 @@ public class ClienteGUI2 extends JFrame {
             }
         });
 
-        // Ações dos botões
-        btnCarregar.addActionListener(_ -> carregarArquivo());
-        btnBuscar.addActionListener(_ -> new BuscarCliente(listaClientes, tableModel));
-        btnInserir.addActionListener(_ -> new InserirCliente(listaClientes, tableModel));
-        // btnRemover.addActionListener(_ -> removerCliente());
-        btnAlfabeto.addActionListener(_ -> ordenarAlfabeticamente());
+        // Ação para carregar clientes
+        btnCarregarCliente.addActionListener(e -> {
+            carregarArquivo();
 
-        btn.add(btnCarregar);
-        btn.add(btnBuscar);
-        btn.add(btnInserir);
-        btn.add(btnRemover);
-        btn.add(btnAlfabeto);
+            // Mostrar os outros botões após carregar o arquivo
+            btnPesquisarCliente.setVisible(true);
+            btnInserirCliente.setVisible(true);
+            btnRemoverCliente.setVisible(true);
+            btnOrdenarClientes.setVisible(true);
+        });
+
+        // Ação para buscar cliente
+        btnPesquisarCliente.addActionListener(e -> {
+            if (arquivoSelecionado == null) {
+                JOptionPane.showMessageDialog(this, "Nenhum arquivo selecionado");
+                return;
+            }
+            new PesquisarCliente(bufferDeClientes, tableModel, arquivoSelecionado);
+        });
+
+        // Ação para inserir novo cliente
+        btnInserirCliente.addActionListener(e -> new InserirCliente(listaClientes, tableModel, bufferDeClientes));
+
+        // Ação para remover cliente
+        btnRemoverCliente.addActionListener(e -> {
+            int selectedRow = table.getSelectedRow();
+            if (selectedRow != -1) {
+                tableModel.removeRow(selectedRow);
+            } else {
+                JOptionPane.showMessageDialog(this, "Selecione um cliente para remover.");
+            }
+        });
+
+        // Ação para ordenar clientes
+        btnOrdenarClientes.addActionListener( e -> ordenarAlfabeticamente());
+
+        // Adicionando botões ao painel
+        btnPanel.add(btnCarregarCliente);
+        btnPanel.add(btnInserirCliente);
+        btnPanel.add(btnRemoverCliente);
+        btnPanel.add(btnOrdenarClientes);
 
         panel.add(scrollPane, BorderLayout.CENTER);
-        panel.add(btn, BorderLayout.SOUTH);
+        panel.add(btnPanel, BorderLayout.SOUTH);
+
         add(panel);
     }
 
