@@ -5,115 +5,112 @@ import models.Cliente;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.List;
 
-public class InserirCliente extends JFrame {
+public class InserirCliente {
 
-    private JTextField campoNome;
-    private JTextField campoSobrenome;
-    private JTextField campoEndereco;
-    private JTextField campoTelefone;
-    private JTextField campoCreditScore;
     private List<Cliente> listaClientes;
-    private DefaultTableModel modeloTabela;
-    private BufferDeClientes bufferDeClientes; // Agora passamos o BufferDeClientes
+    private DefaultTableModel tableModel;
+    private BufferDeClientes bufferDeClientes;
+    private String arquivoSelecionado;
 
-    public InserirCliente(List<Cliente> listaClientes, DefaultTableModel modeloTabela, BufferDeClientes bufferDeClientes) {
+    public InserirCliente(List<Cliente> listaClientes, DefaultTableModel tableModel, BufferDeClientes bufferDeClientes, String arquivoSelecionado) {
         this.listaClientes = listaClientes;
-        this.modeloTabela = modeloTabela;
-        this.bufferDeClientes = bufferDeClientes; // Usando o BufferDeClientes passado no construtor
-        criarFormulario();
+        this.tableModel = tableModel;
+        this.bufferDeClientes = bufferDeClientes;
+        this.arquivoSelecionado = arquivoSelecionado;
+
+        // Inicializar a inserção do cliente
+        inserirNovoCliente();
     }
 
-    private void criarFormulario() {
-        setTitle("Inserindo Novo Cliente");
-        setSize(400, 300);
-        setLayout(new GridLayout(6, 2, 5,5));
+    private void inserirNovoCliente() {
+        // Criação dos campos para os dados do novo cliente
+        JTextField nomeField = new JTextField();
+        JTextField sobrenomeField = new JTextField();
+        JTextField telefoneField = new JTextField();
+        JTextField enderecoField = new JTextField();
+        JTextField creditScoreField = new JTextField();
 
-        // Campos do formulário
-        add(new JLabel("Nome:"));
-        campoNome = new JTextField();
-        add(campoNome);
+        Object[] message = {
+                "Nome:", nomeField,
+                "Sobrenome:", sobrenomeField,
+                "Telefone:", telefoneField,
+                "Endereço:", enderecoField,
+                "Credit Score:", creditScoreField
+        };
 
-        add(new JLabel("Sobrenome:"));
-        campoSobrenome = new JTextField();
-        add(campoSobrenome);
+        // Mostra o diálogo para inserção dos dados
+        int option = JOptionPane.showConfirmDialog(null, message, "Inserir Novo Cliente", JOptionPane.OK_CANCEL_OPTION);
 
-        add(new JLabel("Endereço:"));
-        campoEndereco = new JTextField();
-        add(campoEndereco);
+        if (option == JOptionPane.OK_OPTION) {
+            try {
+                // Criação do novo cliente com os dados inseridos
+                Cliente novoCliente = new Cliente(
+                        nomeField.getText(),
+                        sobrenomeField.getText(),
+                        telefoneField.getText(),
+                        enderecoField.getText(),
+                        Integer.parseInt(creditScoreField.getText())
+                );
 
-        add(new JLabel("Telefone:"));
-        campoTelefone = new JTextField();
-        add(campoTelefone);
+                // Adiciona o novo cliente à lista de clientes
+                listaClientes.add(novoCliente);
 
-        add(new JLabel("CreditScore:"));
-        campoCreditScore = new JTextField();
-        add(campoCreditScore);
+                // Adiciona o novo cliente na tabela visual
+                tableModel.addRow(new Object[]{
+                        tableModel.getRowCount() + 1, novoCliente.getNome(), novoCliente.getSobrenome(),
+                        novoCliente.getTelefone(), novoCliente.getEndereco(), novoCliente.getCreditScore()
+                });
 
-        // Botão para adicionar cliente
-        JButton btnAdicionar = new JButton("Adicionar Cliente");
-        add(btnAdicionar);
+                // Chama o método para escrever no arquivo usando append
+                escreverClienteNoArquivo(novoCliente);
 
-        // Botão para cancelar a inserção
-        JButton btnCancelar = new JButton("Cancelar");
-        add(btnCancelar);
+                JOptionPane.showMessageDialog(null, "Cliente inserido com sucesso!");
 
-        // Ação do botão adicionar
-        btnAdicionar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                adicionarCliente();
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null, "Erro: Credit Score deve ser um número.");
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Erro ao inserir cliente: " + e.getMessage());
+                e.printStackTrace();
             }
-        });
-
-        // Ação do botão cancelar
-        btnCancelar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dispose();  // Fecha o formulário
-            }
-        });
-
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setVisible(true);
+        }
     }
 
-    private void adicionarCliente() {
-        String nome = campoNome.getText();
-        String sobrenome = campoSobrenome.getText();
-        String endereco = campoEndereco.getText();
-        String telefone = campoTelefone.getText();
-        String creditScoreStr = campoCreditScore.getText();
-
+    // Método que escreve o cliente no arquivo sem sobrescrever os dados já existentes
+    private void escreverClienteNoArquivo(Cliente novoCliente) {
         try {
-            int creditScore = Integer.parseInt(creditScoreStr);
+            File arquivo = new File(arquivoSelecionado);
+            boolean arquivoExiste = arquivo.exists();
 
-            // Cria o novo cliente
-            Cliente novoCliente = new Cliente(nome, sobrenome, endereco, telefone, creditScore);
+            // Fluxo para escrita no arquivo, utilizando append
+            try (FileOutputStream fos = new FileOutputStream(arquivo, true);
+                 ObjectOutputStream oos = arquivoExiste
+                         ? new AppendableObjectOutputStream(fos)
+                         : new ObjectOutputStream(fos)) {
 
-            // Verifica se o buffer está no modo de escrita
-            if (bufferDeClientes.getModo() == null || !bufferDeClientes.getModo().equals("escrita")) {
-                JOptionPane.showMessageDialog(this, "O buffer não está no modo de escrita. Cliente não pode ser inserido.");
-                return;
+                oos.writeObject(novoCliente);
             }
 
-            // Adiciona o novo cliente ao buffer
-            bufferDeClientes.adicionaAoBuffer(novoCliente);
+        } catch (IOException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Erro ao gravar o cliente no arquivo: " + e.getMessage());
+        }
+    }
 
-            // Atualiza a tabela de clientes no ClienteGUI
-            modeloTabela.addRow(new Object[]{modeloTabela.getRowCount() + 1, nome, sobrenome, endereco, telefone, creditScore});
+    // Classe personalizada para evitar a reescrita do cabeçalho do ObjectOutputStream
+    static class AppendableObjectOutputStream extends ObjectOutputStream {
+        public AppendableObjectOutputStream(FileOutputStream fos) throws IOException {
+            super(fos);
+        }
 
-            // Exibe mensagem de sucesso e fecha o formulário
-            JOptionPane.showMessageDialog(this, "Cliente inserido com sucesso!");
-            dispose();
-
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "CreditScore inválido. Por favor, insira um número.");
+        @Override
+        protected void writeStreamHeader() throws IOException {
+            reset();  // Evita a reescrita do cabeçalho
         }
     }
 }

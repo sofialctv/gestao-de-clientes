@@ -27,7 +27,7 @@ public class ClienteGUI2 extends JFrame {
 
     public ClienteGUI2() {
         setTitle("Gerenciamento de Clientes");
-        setSize(800, 600); // Reduzido o tamanho da janela
+        setSize(1366, 768);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         bufferDeClientes = new BufferDeClientes();
@@ -56,18 +56,21 @@ public class ClienteGUI2 extends JFrame {
         // Painel de botões na parte inferior
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
-        // Botão para carregar clientes
+        JButton btnGerarArquivoClientes = new JButton("Gerar Clientes");
         JButton btnCarregarCliente = new JButton("Carregar Clientes");
-        JButton btnInserirCliente = new JButton("Inserir Cliente");
-        JButton btnRemoverCliente = new JButton("Remover Cliente");
-        JButton btnOrdenarClientes = new JButton("Ordenar Clientes");
-        JButton btnGerarArquivoClientes = new JButton("Gerar Arquivo de Clientes");  // Novo botão
 
-        // Inicialmente, só o botão de carregar é visível
+        JButton btnInserirCliente = new JButton("Inserir");
+        JButton btnRemoverCliente = new JButton("Remover");
+        JButton btnPesquisarClientes = new JButton("Pesquisar");
+        JButton btnOrdenarClientes = new JButton("Ordenar Clientes");
+
+        btnGerarArquivoClientes.setVisible(true);
+        btnCarregarCliente.setVisible(true);
+
         btnInserirCliente.setVisible(false);
         btnRemoverCliente.setVisible(false);
+        btnPesquisarClientes.setVisible(false);
         btnOrdenarClientes.setVisible(false);
-        btnGerarArquivoClientes.setVisible(true);
 
         // Tabela para mostrar os clientes
         tableModel = new DefaultTableModel(new String[]{"#", "Nome", "Sobrenome", "Telefone", "Endereço", "Credit Score"}, 0);
@@ -79,11 +82,19 @@ public class ClienteGUI2 extends JFrame {
             carregarArquivo();
             btnInserirCliente.setVisible(true);
             btnRemoverCliente.setVisible(true);
+            btnPesquisarClientes.setVisible(true);
             btnOrdenarClientes.setVisible(true);
         });
 
         // Ação para inserir cliente
-        btnInserirCliente.addActionListener(e -> new InserirCliente(listaClientes, tableModel, bufferDeClientes));
+        btnInserirCliente.addActionListener(e -> {
+            if (!arquivoCarregado) {
+                JOptionPane.showMessageDialog(this, "Nenhum arquivo foi carregado para inserção.");
+                return;
+            }
+
+            new InserirCliente(listaClientes, tableModel, bufferDeClientes, arquivoSelecionado);
+        });
 
         // Ação para remover cliente
         btnRemoverCliente.addActionListener(e -> {
@@ -93,6 +104,15 @@ public class ClienteGUI2 extends JFrame {
             } else {
                 JOptionPane.showMessageDialog(this, "Selecione um cliente para remover.");
             }
+        });
+
+        // Ação para buscar cliente
+        btnPesquisarClientes.addActionListener(e -> {
+            if (arquivoSelecionado == null) {
+                JOptionPane.showMessageDialog(this, "Nenhum arquivo selecionado");
+                return;
+            }
+            new PesquisarCliente(bufferDeClientes, tableModel, arquivoSelecionado);
         });
 
         // Ação para ordenar clientes
@@ -106,8 +126,9 @@ public class ClienteGUI2 extends JFrame {
         btnPanel.add(btnCarregarCliente);
         btnPanel.add(btnInserirCliente);
         btnPanel.add(btnRemoverCliente);
+        btnPanel.add(btnPesquisarClientes);
         btnPanel.add(btnOrdenarClientes);
-        
+
         panel.add(scrollPane, BorderLayout.CENTER);
         panel.add(btnPanel, BorderLayout.SOUTH);
 
