@@ -23,7 +23,6 @@ public class ClienteGUI2 extends JFrame {
     private String arquivoSelecionado;
     private boolean arquivoCarregado = false; // Para verificar se o arquivo foi carregado
     private final List<Cliente> listaClientes;
-    private JTextField campoPesquisa; // Campo de pesquisa para "Pesquisar Cliente"
 
     public ClienteGUI2() {
         setTitle("Gerenciamento de Clientes");
@@ -53,7 +52,6 @@ public class ClienteGUI2 extends JFrame {
     private void criarInterface() {
         JPanel panel = new JPanel(new BorderLayout());
 
-        // Painel de botões na parte inferior
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
         JButton btnGerarArquivoClientes = new JButton("Gerar Clientes");
@@ -98,11 +96,11 @@ public class ClienteGUI2 extends JFrame {
 
         // Ação para remover cliente
         btnRemoverCliente.addActionListener(e -> {
-            int selectedRow = table.getSelectedRow();
-            if (selectedRow != -1) {
-                tableModel.removeRow(selectedRow);
-            } else {
-                JOptionPane.showMessageDialog(this, "Selecione um cliente para remover.");
+            try {
+                removerCliente();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Erro ao remover cliente: " + ex.getMessage());
             }
         });
 
@@ -131,27 +129,42 @@ public class ClienteGUI2 extends JFrame {
 
         panel.add(scrollPane, BorderLayout.CENTER);
         panel.add(btnPanel, BorderLayout.SOUTH);
-
         add(panel);
     }
 
     private void carregarMaisClientes() {
-        Cliente[] clientes = bufferDeClientes.proximosClientes(TAMANHO_BUFFER);
+        // Carrega apenas 10.000 registros de cada vez
+        Cliente[] clientes = bufferDeClientes.proximosClientes(TAMANHO_BUFFER); // Chama o método com o tamanho do buffer
         if (clientes != null && clientes.length > 0) {
             for (Cliente cliente : clientes) {
-                if (cliente != null) {
-                    tableModel.addRow(new Object[]{
-                            tableModel.getRowCount() + 1,
-                            cliente.getNome(),
-                            cliente.getSobrenome(),
-                            cliente.getTelefone(),
-                            cliente.getEndereco(),
-                            cliente.getCreditScore()});
+                if (cliente != null) { // Verifica se o cliente não é nulo
+                    tableModel.addRow(new Object[]{tableModel.getRowCount() + 1, cliente.getNome(), cliente.getSobrenome(), cliente.getTelefone(), cliente.getEndereco(), cliente.getCreditScore()});
                 }
             }
-            registrosCarregados += clientes.length;
+            registrosCarregados += clientes.length; // Atualiza o contador
         }
     }
+
+    private void removerCliente() throws IOException {
+        if (arquivoSelecionado == null) {
+            JOptionPane.showMessageDialog(this, "Nenhum arquivo carregado.");
+            return;
+        }
+
+        // Solicita o nome do cliente a ser removido
+        String nomeParaRemover = JOptionPane.showInputDialog(this, "Digite o nome do cliente para remover:");
+
+        // Verifica se o nome foi fornecido
+        if (nomeParaRemover == null || nomeParaRemover.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Você não digitou o nome do cliente.");
+            return;
+        }
+
+        // Chama a função de remoção
+        RemoverCliente.execute(arquivoSelecionado, arquivoSelecionado + "_atualizado.dat", nomeParaRemover.trim(), TAMANHO_BUFFER);
+        JOptionPane.showMessageDialog(this, "Cliente removido com sucesso!");
+    }
+
 
     private void ordenarAlfabeticamente() {
         if (!arquivoCarregado) {
