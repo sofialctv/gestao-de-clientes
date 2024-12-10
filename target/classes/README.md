@@ -1,4 +1,4 @@
-~~# Trabalho Prático 2 - Sistema de Gerenciamento de Cliente
+# Trabalho Prático 2 - Sistema de Gerenciamento de Cliente
 
 _Disciplina de **Técnicas de Programação Avançada**, ministrada pelo Professor [Mateus Conrad B. da Costa](https://github.com/mbarcosta) no curso de Bacharelado em Sistemas de Informação do Instituto Federal do Espírito Santo_.
 

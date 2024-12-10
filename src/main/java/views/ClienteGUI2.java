@@ -3,6 +3,10 @@ package views;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +78,22 @@ public class ClienteGUI2 extends JFrame {
         tableModel = new DefaultTableModel(new String[]{"#", "Nome", "Sobrenome", "Telefone", "Endereço", "Credit Score"}, 0);
         table = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(table);
+
+        scrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+            @Override
+            public void adjustmentValueChanged(AdjustmentEvent e) {
+                if (!scrollPane.getVerticalScrollBar().getValueIsAdjusting()) {
+                    // Verifica se estamos no final da tabela e se o arquivo foi carregado
+                    if (arquivoCarregado &&
+                            scrollPane.getVerticalScrollBar().getValue() +
+                                    scrollPane.getVerticalScrollBar().getVisibleAmount() >=
+                                    scrollPane.getVerticalScrollBar().getMaximum()) {
+                        carregarMaisClientes();
+                    }
+                }
+            }
+        });
+
 
         // Ação para carregar clientes
         btnCarregarCliente.addActionListener(e -> {
